@@ -47,6 +47,9 @@ namespace Footsies
         public Fighter fighter1 { get; private set; }
         public Fighter fighter2 { get; private set; }
 
+        public InputDefine? ServerP1Input { get; set; }
+        public InputDefine? ServerP2Input { get; set; }
+
         public uint fighter1RoundWon { get; private set; }
         public uint fighter2RoundWon { get; private set; }
 
@@ -304,9 +307,19 @@ namespace Footsies
             var time = Time.fixedTime - roundStartTime;
 
             InputData p1Input = new InputData();
-            p1Input.input |= InputManager.Instance.GetButton(InputManager.Command.p1Left) ? (int)InputDefine.Left : 0;
-            p1Input.input |= InputManager.Instance.GetButton(InputManager.Command.p1Right) ? (int)InputDefine.Right : 0;
-            p1Input.input |= InputManager.Instance.GetButton(InputManager.Command.p1Attack) ? (int)InputDefine.Attack : 0;
+
+            // Check if serverp1input is set, if so use it and set it to null
+            if(ServerP1Input != null)
+            {
+                p1Input.input = (int)ServerP1Input;
+                ServerP1Input = null;
+            } else
+            {
+                p1Input.input |= InputManager.Instance.GetButton(InputManager.Command.p1Left) ? (int)InputDefine.Left : 0;
+                p1Input.input |= InputManager.Instance.GetButton(InputManager.Command.p1Right) ? (int)InputDefine.Right : 0;
+                p1Input.input |= InputManager.Instance.GetButton(InputManager.Command.p1Attack) ? (int)InputDefine.Attack : 0;
+            }
+
             p1Input.time = time;
 
             if (debugP1Attack)
@@ -328,7 +341,14 @@ namespace Footsies
 
             InputData p2Input = new InputData();
 
-            if (battleAI != null)
+
+            // Check if serverp1input is set, if so use it and set it to null
+            if(ServerP2Input != null)
+            {
+                p2Input.input = (int)ServerP2Input;
+                ServerP2Input = null;
+            } 
+            else if (battleAI != null)
             {
                 p2Input.input |= battleAI.getNextAIInput();
             }
